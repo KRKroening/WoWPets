@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pets to Collect</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Do+Hyeon" rel="stylesheet">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!--<link rel="stylesheet" href="sorTable/css/sorTable.css">-->
+    <!--<script src="sorTable/js/sorTable.js"></script>-->
+
+
+    <style>
+        table{
+            margin:100px;
+            width:90%;
+        }
+
+        .field-tip {
+            position:relative;
+            cursor:help;
+        }
+        .field-tip .tip-content {
+            position:absolute;
+            top:-6px; /* - top padding */
+            right:9999px;
+            width:200px;
+            margin-right:-220px; /* width + left/right padding */
+            padding:10px;
+            color:#fff;
+            background:#333;
+            -webkit-box-shadow:2px 2px 5px #aaa;
+               -moz-box-shadow:2px 2px 5px #aaa;
+                    box-shadow:2px 2px 5px #aaa;
+            opacity:0;
+            -webkit-transition:opacity 250ms ease-out;
+               -moz-transition:opacity 250ms ease-out;
+                -ms-transition:opacity 250ms ease-out;
+                 -o-transition:opacity 250ms ease-out;
+                    transition:opacity 250ms ease-out;
+        }
+            /* <http://css-tricks.com/snippets/css/css-triangle/> */
+            .field-tip .tip-content:before {
+                content:' '; /* Must have content to display */
+                position:absolute;
+                top:50%;
+                left:-16px; /* 2 x border width */
+                width:0;
+                height:0;
+                margin-top:-8px; /* - border width */
+                border:8px solid transparent;
+                border-right-color:#333;
+            }
+            .field-tip:hover .tip-content {
+                right:-20px;
+                opacity:1;
+            }
+
+            <!---->
+
+            .results tr[visible='false'],
+            .no-result{
+              display:none;
+            }
+
+            .results tr[visible='true']{
+              display:table-row;
+            }
+
+            .counter{
+              padding:8px;
+              color:#ccc;
+            }
+    </style>
+
+</head>
+<body>
+<a href="{% url 'index' %}">Go Back</a>
+<h1>Pet Information</h1>
+<small> Details about {{ pet.creatureName }}.</small>
+
+
+    {% if pet %}
+        <div class="form-group pull-right">
+
+        </div>
+
+{% else %}
+    <p>Pet ID# {{ creatureId }} not found.</p>
+{% endif %}
+    <form id='removeTrigger' action="{% url 'RemoveFromCollection' pet.creatureId %}" method="post">
+        {% csrf_token %}
+        <button id="removeFromCollection" name="removeFromCollection" class="btn btn-danger" type="submit">Remove From Collection</button>
+    </form>
+</body>
+
+<script>
+    $(document).ready(function() {
+
+    $("#updateCollection").click(function(){
+        $(".loaderContainer").removeClass("hidden")
+    });
+
+
+    $(".search").keyup(function () {
+        var searchTerm = $(".search").val();
+        var listItem = $('.results tbody').children('tr');
+        var searchSplit = searchTerm.replace(/ /g, "'):containsi('")
+
+    $.extend($.expr[':'], {'containsi': function(elem, i, match, array){
+            return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+        }
+    });
+
+    $(".results tbody tr").not(":containsi('" + searchSplit + "')").each(function(e){
+        $(this).attr('visible','false');
+    });
+
+    $(".results tbody tr:containsi('" + searchSplit + "')").each(function(e){
+        $(this).attr('visible','true');
+    });
+
+    var jobCount = $('.results tbody tr[visible="true"]').length;
+        $('.counter').text(jobCount + ' item');
+
+    if(jobCount == '0') {$('.no-result').show();}
+        else {$('.no-result').hide();}
+            });
+    });
+</script>
+</html>
